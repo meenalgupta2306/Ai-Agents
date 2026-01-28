@@ -1,0 +1,14 @@
+/mcpServer/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+/documents/
+/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+.env

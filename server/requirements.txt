@@ -1,0 +1,7 @@
+mcp
+flask
+flask-cors
+requests
+python-dotenv
+google-genai
+fastmcp

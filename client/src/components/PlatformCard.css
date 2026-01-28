@@ -1,0 +1,100 @@
+.platform-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s;
+    background: white;
+}
+
+.platform-card:not(.coming-soon):hover {
+    border-color: #0077B5;
+    box-shadow: 0 4px 12px rgba(0, 119, 181, 0.1);
+    transform: translateY(-2px);
+}
+
+.platform-card.coming-soon {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.platform-card.connected {
+    border-color: #10b981;
+    background: linear-gradient(to bottom, #f0fdf4, white);
+}
+
+.platform-icon {
+    color: #0077B5;
+    margin-bottom: 8px;
+}
+
+.platform-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: #1f2937;
+    text-align: center;
+}
+
+.badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.connected-badge {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.coming-soon-badge {
+    background: #e5e7eb;
+    color: #6b7280;
+}
+
+.connected-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.connect-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.connect-button.primary {
+    background: #0077B5;
+    color: white;
+}
+
+.connect-button.primary:hover:not(:disabled) {
+    background: #005582;
+}
+
+.connect-button.secondary {
+    background: white;
+    color: #0077B5;
+    border: 1px solid #0077B5;
+}
+
+.connect-button.secondary:hover:not(:disabled) {
+    background: #f0f9ff;
+}
+
+.connect-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
