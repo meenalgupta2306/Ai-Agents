@@ -20,10 +20,11 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 CORS(app, supports_credentials=True)
 
-from routes import api_blueprint
+from routes import api_blueprint, chat_blueprint
 
-# Register blueprint
+# Register blueprints
 app.register_blueprint(api_blueprint)
+app.register_blueprint(chat_blueprint)
 
 
 @app.route("/api/oauth/linkedin/callback")

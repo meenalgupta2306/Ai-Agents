@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import UserProfileDropdown from './components/UserProfileDropdown';
+import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import LinkedInOAuthCallback from './pages/LinkedInOAuthCallback';
 import './App.css';
@@ -24,7 +25,7 @@ function App() {
 
           <main className="App-main">
             <Routes>
-              <Route path="/" element={<Navigate to="/profile" replace />} />
+              <Route path="/" element={<Chat />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/oauth/linkedin/callback" element={<LinkedInOAuthCallback />} />
             </Routes>

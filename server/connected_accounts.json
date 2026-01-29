@@ -4,24 +4,13 @@
       {
         "platform": "linkedin",
         "type": "personal",
-        "name": "Meenal Gupta",
+        "name": "Sanket Sharma",
         "email": null,
-        "accountId": "urn:li:person:-Kg4n7pILF",
-        "accessToken": "AQXcABP2H6S6L3z6Exj3FGAOGTJD-_X20drZDJ15E9bZgRaWMrrHD-0xlVzkT0KfANQfGYt2ifwY5w5mPn3Ys6ZItAQqPcs6WOsQ76pbw3l2tjqPJb_lNf3OzpodyGZDzWARHjEiziSE-03zlIUloEfbpnxncy2uUAcAzoZY9-LKfaTrkPMTRSeJ6GHcC9heS_vM0OFRddgZBkTsaO_FXHHpdjedroYtcpcZZ3bmze9OLC22IfOCFSkbWwlenGM5v91TG252PYMhn_Ed-nSZgWc6Ft7YEHQ8gmC6MS4DgS7lGyfEqycr1gFvvFvFHHE8JitPJXPXhWV7oh6we_As4df5ZwCDgA",
+        "accountId": "urn:li:person:95PIJ_3fGG",
+        "accessToken": "AQWnHhRo5BzrmE10Hw86pm9iPFhe462f-1iQ7ggdscyb43_FsApKWGe2_BzOPL72DYIrnX0MTsLRc2woNsJNq3MgHYbv3dQNSkekikSxrReMQMu228_bJWqzugtLHEbV6DwWwbcsM_FAdFYQVku5dW9ZeZYsst_SE4uH53Ld6wqTm7p_YzkoItunr9IBJ6UXLvdh_YpAHOUiBwEcw-wSoeYoU7FmLmSEFLCCrLTl-ci8Z-5wgB11tmhic-linjG6yNLSyn2qPInW_1r6V1sFU0uIWUqRUTc2-y_mIs7jL6Z_QBtT9LbWMVUQoLT44ngpdF3oRrapFPnhp-fl2DAJ3hY_6l-nOw",
         "picture": null,
-        "id": "3e836167-d7cb-4ab2-83be-756d198866a8",
-        "connectedAt": "2026-01-28T16:02:07.215320"
-      },
-      {
-        "platform": "linkedin",
-        "type": "organization",
-        "name": "Agentic-Lab-poc",
-        "accountId": "urn:li:organization:110911961",
-        "accessToken": "AQXcABP2H6S6L3z6Exj3FGAOGTJD-_X20drZDJ15E9bZgRaWMrrHD-0xlVzkT0KfANQfGYt2ifwY5w5mPn3Ys6ZItAQqPcs6WOsQ76pbw3l2tjqPJb_lNf3OzpodyGZDzWARHjEiziSE-03zlIUloEfbpnxncy2uUAcAzoZY9-LKfaTrkPMTRSeJ6GHcC9heS_vM0OFRddgZBkTsaO_FXHHpdjedroYtcpcZZ3bmze9OLC22IfOCFSkbWwlenGM5v91TG252PYMhn_Ed-nSZgWc6Ft7YEHQ8gmC6MS4DgS7lGyfEqycr1gFvvFvFHHE8JitPJXPXhWV7oh6we_As4df5ZwCDgA",
-        "vanityName": "agentic-lab-poc",
-        "logoUrl": null,
-        "id": "8ed5e2b5-3d89-428e-87c5-6c1e9ce5f708",
-        "connectedAt": "2026-01-28T16:02:07.217067"
+        "id": "e4882fbb-5935-4f49-9935-d98991e29224",
+        "connectedAt": "2026-01-28T16:32:41.920269"
       }
     ]
   }

@@ -137,6 +137,59 @@ def post_to_linkedin(text: str, image_path: str = None):
             return {"status": "AUTH_REQUIRED", "url": "http://localhost:5000/login"}
         return {"status": "FAILED", "error": str(e)}
 
+@mcp.tool("get_connected_accounts")
+def get_connected_accounts(user_email: str) -> str:
+    """
+    Gets all connected social media accounts for a user.
+    
+    Args:
+        user_email: The email of the user to get accounts for.
+        
+    Returns:
+        A JSON string with account details (platform, name, type, accountId).
+    """
+    try:
+        # Import oauth_service from parent directory
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from oauth_service import OAuthService
+        
+        oauth_service = OAuthService()
+        accounts = oauth_service.get_user_accounts(user_email)
+        
+        # Remove sensitive data (access tokens)
+        safe_accounts = []
+        for account in accounts:
+            safe_account = {
+                "platform": account.get("platform"),
+                "type": account.get("type"),
+                "name": account.get("name"),
+                "accountId": account.get("accountId"),
+                "email": account.get("email"),
+                "vanityName": account.get("vanityName"),
+            }
+            safe_accounts.append(safe_account)
+        
+        if not safe_accounts:
+            return json.dumps({
+                "status": "SUCCESS",
+                "message": "No connected accounts found.",
+                "accounts": []
+            })
+        
+        return json.dumps({
+            "status": "SUCCESS",
+            "accounts": safe_accounts,
+            "count": len(safe_accounts)
+        })
+        
+    except Exception as e:
+        console.print(f"[red]Error getting connected accounts: {e}[/red]")
+        return json.dumps({
+            "status": "ERROR",
+            "error": str(e)
+        })
+
+
 if __name__ == "__main__":
     # FastMCP uses stdio by default, which is perfect for Claude Desktop
     mcp.run()

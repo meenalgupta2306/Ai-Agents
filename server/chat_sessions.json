@@ -1,0 +1,43 @@
+{
+  "test@example.com": {
+    "06320b7f-0906-412a-956a-d107bf9137f4": {
+      "created_at": "2026-01-29T08:48:29.955965Z",
+      "updated_at": "2026-01-29T09:00:19.137012Z",
+      "model": "gemini-2.5-pro",
+      "messages": [
+        {
+          "role": "user",
+          "content": "fetch connected accounts",
+          "timestamp": "2026-01-29T08:59:17.569749Z"
+        },
+        {
+          "role": "assistant",
+          "content": "Here are your connected accounts:\n\n- Platform: LinkedIn\n- Name: Sanket Sharma\n- Type: Personal\n\nWould you like to post to any of these accounts?",
+          "timestamp": "2026-01-29T08:59:26.805250Z"
+        },
+        {
+          "role": "user",
+          "content": "fetch connected accounts",
+          "timestamp": "2026-01-29T09:00:15.368594Z"
+        },
+        {
+          "role": "assistant",
+          "content": "Here are your connected accounts:\n\n- Platform: LinkedIn\n- Name: Sanket Sharma\n- Type: Personal\n\nWould you like to post to any of these accounts?",
+          "timestamp": "2026-01-29T09:00:19.137012Z"
+        }
+      ]
+    },
+    "4c52cb19-3cf6-486e-b880-55d4606d1e4f": {
+      "created_at": "2026-01-29T08:48:30.260464Z",
+      "updated_at": "2026-01-29T08:48:30.261228Z",
+      "model": "gemini-2.5-pro",
+      "messages": [
+        {
+          "role": "user",
+          "content": "fetch connected accounts",
+          "timestamp": "2026-01-29T08:48:30.261228Z"
+        }
+      ]
+    }
+  }
+}

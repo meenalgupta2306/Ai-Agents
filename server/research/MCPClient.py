@@ -44,7 +44,7 @@ class MCPClient:
         await self.session.initialize()
 
 
-    async def get_gemini_tools(self):
+    async def getAvailableTools(self):
         """Fetches tools from MCP server and formats them for Gemini SDK."""
         if not self.session:
             return []
@@ -66,7 +66,7 @@ class MCPClient:
             model="gemini-2.0-flash",
             config=types.GenerateContentConfig(
                 tools=[{
-                    "function_declarations": await self.get_gemini_tools()
+                    "function_declarations": await self.getAvailableTools()
                 }]
             )
         )

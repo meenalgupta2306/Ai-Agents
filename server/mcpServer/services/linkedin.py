@@ -4,7 +4,7 @@ import os
 from rich.console import Console
 
 
-BASE_URL = "https://api.linkedin.com/rest"
+BASE_URL = "https://api.linkedin.com/v2"
 
 console = Console(stderr=True)
 
