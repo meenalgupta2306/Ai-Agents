@@ -9,7 +9,7 @@ import uuid
 
 
 class ChatStorage:
-    def __init__(self, storage_file="chat_sessions.json"):
+    def __init__(self, storage_file="documents/json/chat_sessions.json"):
         self.storage_file = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             storage_file

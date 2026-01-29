@@ -228,20 +228,38 @@ Communication Style:
                     
                     assistant_message = response.choices[0].message
                     
-                    # Add assistant message to conversation
-                    if assistant_message.content:
-                        messages.append({
-                            "role": "assistant",
-                            "content": assistant_message.content
-                        })
-
                     print(f"\n🤖 Assistant response (iteration {iteration}):\n{vars(assistant_message)}\n")
-
                     
                     # Check for tool calls
                     if not hasattr(assistant_message, 'tool_calls') or not assistant_message.tool_calls:
+                        # No tool calls - add assistant message and finish
+                        if assistant_message.content:
+                            messages.append({
+                                "role": "assistant",
+                                "content": assistant_message.content
+                            })
                         final_response = assistant_message.content
                         break
+                    
+                    # Has tool calls - add assistant message with tool_calls
+                    # IMPORTANT: Both OpenAI and Gemini need tool_calls preserved in history
+                    assistant_msg = {
+                        "role": "assistant",
+                        "content": assistant_message.content or "",
+                        "tool_calls": [
+                            {
+                                "id": tc.id,
+                                "type": "function",
+                                "function": {
+                                    "name": tc.function.name,
+                                    "arguments": tc.function.arguments
+                                }
+                            }
+                            for tc in assistant_message.tool_calls
+                        ]
+                    }
+                    
+                    messages.append(assistant_msg)
                     
                     # Execute tool calls
                     for tool_call in assistant_message.tool_calls:

@@ -78,7 +78,7 @@ def create_post():
         import json
         from datetime import datetime
         
-        posts_file = os.path.join(base_dir, "posts_storage.json")
+        posts_file = os.path.join(base_dir, "..", "documents", "json", "posts_storage.json")
         
         # Read existing posts
         try:
@@ -139,7 +139,7 @@ def delete_post():
         try:
             import json
             base_dir = os.path.dirname(os.path.abspath(__file__))
-            posts_file = os.path.join(base_dir, "posts_storage.json")
+            posts_file = os.path.join(base_dir, "..", "documents", "json", "posts_storage.json")
             
             with open(posts_file, 'r') as f:
                 posts = json.load(f)
@@ -275,7 +275,7 @@ def get_posts():
     try:
         import json
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        posts_file = os.path.join(base_dir, "posts_storage.json")
+        posts_file = os.path.join(base_dir, "..", "documents", "json", "posts_storage.json")
         
         try:
             with open(posts_file, 'r') as f:
@@ -420,14 +420,39 @@ def linkedin_oauth_finalize():
         
         print("\n✅ ACCESS TOKEN RECEIVED")
         
-        # Use LinkedIn service to get profile and organizations
+        # Create LinkedIn service
         linkedin_service = LinkedInService(access_token)
         
-        profile = linkedin_service.get_profile()
-        organizations = linkedin_service.get_organizations()
+        # Try to get profile, but don't fail if it doesn't work
+        # /v2/me requires specific scopes that may not be available
+        profile = None
+        try:
+            print("\n🔍 Attempting to fetch LinkedIn profile via /v2/me...")
+            profile = linkedin_service.get_profile()
+            print(f"✅ Profile fetched successfully: {profile.get('name')} ({profile.get('urn')})")
+        except Exception as profile_error:
+            print(f"\n⚠️ Could not fetch profile from /v2/me: {str(profile_error)}")
+            import traceback
+            traceback.print_exc()
+            # Create a fallback profile
+            profile = {
+                "urn": f"urn:li:person:unknown",
+                "name": "LinkedIn User",
+                "id": "unknown"
+            }
         
-        print(f"✅ Profile: {profile}")
-        print(f"✅ Organizations: {len(organizations)} found")
+        # Fetch organizations where user has admin access
+        organizations = []
+        try:
+            organizations = linkedin_service.get_organizations()
+            print(f"✅ Organizations: {len(organizations)} found")
+            
+            # If we couldn't get personal profile but have orgs, that's fine
+            # Most users will connect organization pages anyway
+        except Exception as org_error:
+            print(f"⚠️ Error fetching organizations: {org_error}")
+            import traceback
+            traceback.print_exc()
         
         # Store token in session with a unique ID
         token_session_id = str(uuid.uuid4())
@@ -442,6 +467,8 @@ def linkedin_oauth_finalize():
         
     except Exception as e:
         print(f"❌ Error finalizing LinkedIn OAuth: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "success": False,
             "error": str(e)

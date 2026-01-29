@@ -97,7 +97,7 @@ def post_to_linkedin(text: str, image_path: str = None):
      Posts content to LinkedIn for the currently authenticated user.
     """
     BASE_DIR = Path(__file__).resolve().parent        # .../server/mcpServer
-    creds_path = BASE_DIR.parent / "linkedin_creds.json"  
+    creds_path = BASE_DIR.parent / "documents" / "json" / "linkedin_creds.json"  
 
     console.print(os.path.exists(creds_path), "JSON EXISIT--------------")
     # 1. Check for the "Signal" file

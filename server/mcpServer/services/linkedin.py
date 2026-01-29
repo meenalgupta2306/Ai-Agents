@@ -17,7 +17,7 @@ class LinkedInService:
         self.headers = {
             "Authorization": f"Bearer {self.token}",
             "X-Restli-Protocol-Version": "2.0.0",
-            "LinkedIn-Version": "202506",
+            "LinkedIn-Version": "202511",
             "Content-Type": "application/json",
         }
     
@@ -25,10 +25,12 @@ class LinkedInService:
         """Get user profile information including email"""
         try:
             # Get basic profile
+
+            print("\n\n calaling")
+            print(f"{BASE_URL}/me")
             profile_resp = requests.get(
                 f"{BASE_URL}/me",
-                headers=self.headers,
-                timeout=10
+                headers={"Authorization": f"Bearer {self.token}"}
             )
             profile_resp.raise_for_status()
             profile = profile_resp.json()

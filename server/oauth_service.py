@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ACCOUNTS_FILE = os.path.join(os.path.dirname(__file__), "connected_accounts.json")
+ACCOUNTS_FILE = os.path.join(os.path.dirname(__file__), "documents", "json", "connected_accounts.json")
 
 
 class OAuthService:

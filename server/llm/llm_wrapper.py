@@ -158,12 +158,14 @@ class LLMWrapper:
                 if content:
                     parts.append(types.Part(text=content))
                 
-                # If preserving tool calls for Iteration 2+
+                # Handle tool calls from orchestrator (both OpenAI and Gemini)
                 if "tool_calls" in msg:
                     for tc in msg["tool_calls"]:
+                        # tc is a dict: {"id": "...", "type": "function", "function": {"name": "...", "arguments": "..."}}
+                        func = tc["function"]
                         parts.append(types.Part.from_function_call(
-                            name=tc.function.name,
-                            args=json.loads(tc.function.arguments)
+                            name=func["name"],
+                            args=json.loads(func["arguments"]) if isinstance(func["arguments"], str) else func["arguments"]
                         ))
                 history.append(types.ModelContent(parts=parts))
             elif role == "tool":
