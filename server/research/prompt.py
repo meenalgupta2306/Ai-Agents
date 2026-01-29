@@ -3,9 +3,16 @@ def getResearchPrompt(type, user_query):
     if type == 'report':
         body = """
         INSTRUCTIONS:
-        1. Write the research report in clean HTML format (use <h2>, <p>, <ul> tags).
-        2. When a visual (image or chart) is needed to support the text, insert this exact placeholder: [[VISUAL_PLACEHOLDER:unique_id]]
-        3. Do not attempt to generate the image or chart yourself.
+        1. Write the research report as a COMPLETE, STANDALONE HTML DOCUMENT.
+        2. You MUST include:
+            - <!DOCTYPE html>
+            - <html>
+            - <head> (with <meta charset="UTF-8">)
+            - <body>
+        3. Use only <h2>, <p>, <ul>, <li> for content structure inside <body>.
+        4. When a visual (image or chart) is needed to support the text, insert this exact placeholder: [[VISUAL_PLACEHOLDER:unique_id]]
+        5. Do not attempt to generate the image or chart yourself.
+        6. Do NOT generate partial HTML, table cells, or fragments.
 
         JSON SCHEMA FOR VISUALS:
         {{

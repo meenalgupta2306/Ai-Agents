@@ -39,7 +39,7 @@ mcp = FastMCP("Backend MCP Server")
 async def start_research(research_type: str, user_query: str) -> str:
     """
     Performs deep research on a topic. 
-    research_type: 'report' for HTML or 'summary' for text.
+    research_type: 'report' for research or 'summary' for social media post.
     user_query: MUST contain the user's complete request verbatim.
     Do NOT summarize, shorten, or paraphrase.
     Include comparison criteria, constraints, and output format exactly as given.

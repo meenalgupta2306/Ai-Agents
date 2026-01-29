@@ -2,7 +2,7 @@
 Chat API Routes - Handles chat messages with Gemini/OpenAI and MCP tool calling
 Uses LLM wrapper for model selection and chat storage for session persistence
 """
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, send_file
 import os
 import sys
 import asyncio
@@ -183,7 +183,30 @@ Communication Style:
 - Use web search proactively to gather current information before asking users for clarification
 - When presenting data from tools (like connected accounts, metrics, or posts), format it in a clear, readable way
 - Offer relevant next actions based on the data you retrieve
-- Keep responses concise but informative"""
+- Keep responses concise but informative
+
+Response Format:
+- For direct answers, respond in plain text
+- If the response contains file locations or downloadable content, return in JSON format:
+{{
+  "message": "Your message text with {{{{REPORT_LINK}}}} placeholder where the link should appear",
+  "action": {{
+    "type": "view_report",
+    "filename": "final_report.html",
+    "label": "final_report.html"
+  }}
+}}
+
+Example:
+{{
+  "message": "Report completed! View it here: {{{{REPORT_LINK}}}}",
+  "action": {{
+    "type": "view_report",
+    "filename": "final_report.html",
+    "label": "final_report.html"
+  }}
+}}
+"""
 
         messages = [{"role": "system", "content": system_prompt}]
         
@@ -318,4 +341,94 @@ Communication Style:
         print(f"❌ Error in chat endpoint: {e}")
         import traceback
         traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@chat_blueprint.route("/reports/<filename>", methods=["GET"])
+def get_report(filename):
+    """
+    Serve a research report HTML file
+    
+    Args:
+        filename: Name of the report file (e.g., 'final_report.html')
+    
+    Returns:
+        HTML file content or 404 if not found
+    """
+    try:
+        # Security: Only allow .html files and prevent directory traversal
+        print(f"📄 API HIT - Filename requested: {filename}")
+        if not filename.endswith('.html') or '/' in filename or '\\' in filename or '..' in filename:
+            return jsonify({"error": "Invalid filename"}), 400
+        
+        # Construct path to reports directory
+        server_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        reports_dir = os.path.join(server_root, os.getenv("DOCUMENT_PATH", "documents"), "reports")
+        report_path = os.path.join(reports_dir, filename)
+        
+        print(f"📂 Server root: {server_root}")
+        print(f"📂 Reports dir: {reports_dir}")
+        print(f"📂 Full report path: {report_path}")
+        print(f"📂 File exists: {os.path.exists(report_path)}")
+        
+        # Check if file exists
+        if not os.path.exists(report_path):
+            print(f"❌ File not found: {report_path}")
+            return jsonify({"error": "Report not found"}), 404
+        
+        # Read and print first 200 chars to verify content
+        with open(report_path, 'r') as f:
+            preview = f.read(200)
+            print(f"📄 File preview: {preview}")
+        
+        # Return the HTML file
+        print(f"✅ Serving file: {report_path}")
+        return send_file(report_path, mimetype='text/html')
+        
+    except Exception as e:
+        print(f"❌ Error serving report: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@chat_blueprint.route("/reports/images/<filename>", methods=["GET"])
+def get_report_image(filename):
+    """Serve research report images"""
+    try:
+        # Security: prevent directory traversal
+        if '/' in filename or '\\' in filename or '..' in filename:
+            return jsonify({"error": "Invalid filename"}), 400
+        
+        server_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        images_dir = os.path.join(server_root, os.getenv("DOCUMENT_PATH", "documents"), "images")
+        image_path = os.path.join(images_dir, filename)
+        
+        if not os.path.exists(image_path):
+            return jsonify({"error": "Image not found"}), 404
+        
+        return send_file(image_path)
+    except Exception as e:
+        print(f"❌ Error serving image: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@chat_blueprint.route("/reports/charts/<filename>", methods=["GET"])
+def get_report_chart(filename):
+    """Serve research report charts"""
+    try:
+        # Security: prevent directory traversal
+        if '/' in filename or '\\' in filename or '..' in filename:
+            return jsonify({"error": "Invalid filename"}), 400
+        
+        server_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        charts_dir = os.path.join(server_root, os.getenv("DOCUMENT_PATH", "documents"), "charts")
+        chart_path = os.path.join(charts_dir, filename)
+        
+        if not os.path.exists(chart_path):
+            return jsonify({"error": "Chart not found"}), 404
+        
+        return send_file(chart_path)
+    except Exception as e:
+        print(f"❌ Error serving chart: {e}")
         return jsonify({"error": str(e)}), 500

@@ -94,6 +94,17 @@
     background: #dc2626;
 }
 
+.report-link {
+    color: #2563eb;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.report-link:hover {
+    color: #1d4ed8;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
