@@ -10,15 +10,16 @@ import uuid
 
 class ChatStorage:
     def __init__(self, storage_file="documents/json/chat_sessions.json"):
-        self.storage_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            storage_file
-        )
+        # Get server root (3 levels up from features/chat/storage.py)
+        server_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.storage_file = os.path.join(server_root, storage_file)
         self._ensure_file_exists()
     
     def _ensure_file_exists(self):
         """Create storage file if it doesn't exist"""
         if not os.path.exists(self.storage_file):
+            # Create directory if it doesn't exist
+            os.makedirs(os.path.dirname(self.storage_file), exist_ok=True)
             with open(self.storage_file, 'w') as f:
                 json.dump({}, f)
     

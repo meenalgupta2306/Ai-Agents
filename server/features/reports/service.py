@@ -2,9 +2,9 @@ import json
 import re
 import os
 from rich.console import Console
-from research.assembler import Assembler
-from research.generators.image_generator import ImageGenerator
-from research.generators.chart_generator import ChartGenerator
+from features.research.assembler import Assembler
+from features.research.generators.image_generator import ImageGenerator
+from features.research.generators.chart_generator import ChartGenerator
 
 console = Console(stderr=True)
 

@@ -8,7 +8,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ACCOUNTS_FILE = os.path.join(os.path.dirname(__file__), "documents", "json", "connected_accounts.json")
+# Get server root (3 levels up from features/oauth/service.py)
+SERVER_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ACCOUNTS_FILE = os.path.join(SERVER_ROOT, "documents", "json", "connected_accounts.json")
 
 
 class OAuthService:
