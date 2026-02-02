@@ -54,9 +54,24 @@ def generate_image(prompt: str, filename: str) -> str:
 
 
 @mcp.tool()
-def post_to_linkedin(text: str, image_path: str = None):
-    """Posts content to LinkedIn for the currently authenticated user."""
-    return linkedin_tool.linkedin_tool(text, image_path)
+def post_to_linkedin(account_id: str, text: str, user_email: str = "test@example.com", image_path: str = None):
+    """
+    Posts content to LinkedIn using a specific connected account.
+    
+    IMPORTANT: You must first call get_connected_accounts to get the account_id.
+    
+    Args:
+        account_id: The accountId from get_connected_accounts (e.g., 'urn:li:person:...')
+        text: The text content to post to LinkedIn
+        user_email: Email of the user (defaults to test@example.com)
+        image_path: Optional path to an image file to include in the post
+        
+    Example workflow:
+        1. Call get_connected_accounts(user_email="test@example.com")
+        2. Get the accountId from the response
+        3. Call post_to_linkedin(account_id="urn:li:person:...", text="My post")
+    """
+    return linkedin_tool.linkedin_tool(account_id, text, user_email, image_path)
 
 
 @mcp.tool("get_connected_accounts")

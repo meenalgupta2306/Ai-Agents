@@ -4,6 +4,7 @@ import os
 import asyncio
 from .storage import get_chat_storage
 from .service import ChatService
+from .artifacts import extract_artifacts_from_history, build_artifact_context
 from shared.llm import get_llm_wrapper
 
 
@@ -133,6 +134,7 @@ Your capabilities:
 - Generate images based on descriptions
 - Manage connected social media accounts (LinkedIn personal and company pages)
 - Analyze social media performance metrics
+- Read and reference previously generated files from this conversation
 
 Communication Style:
 - Be helpful, professional, and conversational
@@ -141,6 +143,14 @@ Communication Style:
 - When presenting data from tools (like connected accounts, metrics, or posts), format it in a clear, readable way
 - Offer relevant next actions based on the data you retrieve
 - Keep responses concise but informative
+- When the user references "that research", "the report", or "that file", check the artifact context for previously generated files
+
+LinkedIn Posting Workflow:
+IMPORTANT: To post to LinkedIn, you MUST follow this workflow:
+1. First call get_connected_accounts(user_email="{user_email}") to get the list of connected accounts
+2. Extract the accountId from the response (e.g., "urn:li:person:...")
+3. Then call post_to_linkedin(account_id="<accountId>", text="<your post content>", user_email="{user_email}")
+DO NOT skip step 1. Always get the connected accounts first to obtain the account_id.
 
 Response Format:
 - For direct answers, respond in plain text
@@ -164,6 +174,13 @@ Response Format:
                     if user_msg_count > 10:
                         break
                 messages.insert(1, {"role": msg['role'], "content": msg['content']})
+            
+            # Extract and inject artifact context (hidden from user, visible to LLM)
+            artifacts = extract_artifacts_from_history(session_messages)
+            if artifacts:
+                artifact_context = build_artifact_context(artifacts)
+                # Insert before the current user message
+                messages.append({"role": "assistant", "content": artifact_context})
             
             # Run async orchestration
             async def run_chat():
