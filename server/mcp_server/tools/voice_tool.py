@@ -25,8 +25,11 @@ def voice_tool(text: str, user_email: str = "test@example.com"):
     user_id = user_email.replace('@', '_').replace('.', '_')
     
     # Check if user has a voice sample
-    sample_path = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}' / 'sample.wav'
-    if not sample_path.exists():
+    # Check if user has any voice samples
+    user_samples_dir = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}'
+    has_samples = any(user_samples_dir.glob('*.wav')) if user_samples_dir.exists() else False
+    
+    if not has_samples:
         return {
             "status": "ERROR",
             "message": "No voice sample found. Please upload a voice sample first by visiting the Voice Setup page in your profile settings.",
@@ -50,7 +53,12 @@ def voice_tool(text: str, user_email: str = "test@example.com"):
             # Get the generated audio file path
             audio_filename = result.get('audio_filename')
             if audio_filename:
-                audio_file_path = DOCUMENTS_DIR / 'generated_audio' / f'user_{user_id}' / audio_filename
+                # Check the new standardized location first
+                audio_file_path = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}' / 'generated' / audio_filename
+                
+                # Fallback to legacy location
+                if not audio_file_path.exists():
+                    audio_file_path = DOCUMENTS_DIR / 'generated_audio' / f'user_{user_id}' / audio_filename
                 
                 # Read and encode audio file as base64
                 if audio_file_path.exists():

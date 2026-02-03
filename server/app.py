@@ -15,11 +15,18 @@ from features.linkedin.routes import linkedin_blueprint
 from features.oauth.routes import oauth_blueprint
 from features.chat.routes import chat_blueprint
 from features.voice.routes import voice_blueprint
+from features.voice_cloning import voice_cloning_bp, init_voice_cloning_service
 
 app.register_blueprint(linkedin_blueprint)
 app.register_blueprint(oauth_blueprint)
 app.register_blueprint(chat_blueprint)
 app.register_blueprint(voice_blueprint)
+app.register_blueprint(voice_cloning_bp)
+
+# Initialize voice cloning service
+DOCUMENTS_DIR = os.getenv('DOCUMENTS_DIR', './documents')
+VOICE_SERVICE_URL = os.getenv('VOICE_SERVICE_URL', 'http://localhost:5002')
+init_voice_cloning_service(DOCUMENTS_DIR, VOICE_SERVICE_URL)
 
 
 # OAuth callback (stays in app.py as it's a redirect endpoint)

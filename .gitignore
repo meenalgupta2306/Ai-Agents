@@ -7,3 +7,10 @@ __pycache__/
 voice_service/venv/
 voice_service/voice_service.log
 voice_service/.env
+
+# SadTalker dependencies
+server/dependencies/SadTalker/
+server/dependencies/*/checkpoints/
+server/dependencies/*/gfpgan/
+*.pth
+*.ckpt

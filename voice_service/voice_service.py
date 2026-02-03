@@ -173,7 +173,11 @@ def upload_sample():
             return jsonify({'error': 'Empty filename'}), 400
         
         # Create user directory
-        user_dir = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}'
+        # Create user directory (handle prefix)
+        if str(user_id).startswith('user_') or str(user_id).startswith('set_'):
+             user_dir = DOCUMENTS_DIR / 'voice_samples' / user_id
+        else:
+             user_dir = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}'
         user_dir.mkdir(parents=True, exist_ok=True)
         
         # Generate unique filename
@@ -240,11 +244,8 @@ def upload_sample():
         with open(metadata_path, 'w') as f:
             json.dump(metadata, f, indent=2)
             
-        # Also copy this file to 'sample.wav' for backward compatibility
-        # This ensures existing endpoints/frontend still work with the "latest" sample
-        legacy_path = user_dir / 'sample.wav'
-        import shutil
-        shutil.copy2(sample_path, legacy_path)
+        # Legacy sample.wav copy logic removed to avoid file duplication confusion.
+        # Newer endpoints scan for all .wav files or use metadata.json.
         
         logger.info(f"Voice sample uploaded for user {user_id}: {unique_filename}")
         
@@ -287,7 +288,10 @@ def generate_speech():
             return jsonify({'error': 'user_id and text are required'}), 400
         
         # Check if user has voice samples
-        user_dir = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}'
+        if str(user_id).startswith('user_') or str(user_id).startswith('set_'):
+            user_dir = DOCUMENTS_DIR / 'voice_samples' / user_id
+        else:
+            user_dir = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}'
         if not user_dir.exists():
              return jsonify({
                 'error': 'No voice samples found for this user',
@@ -327,7 +331,10 @@ def generate_speech():
         output_filename = f'{timestamp}_{text_hash}.wav'
         
         # Create output directory
-        output_dir = DOCUMENTS_DIR / 'generated_audio' / f'user_{user_id}'
+        if str(user_id).startswith('user_') or str(user_id).startswith('set_'):
+             output_dir = DOCUMENTS_DIR / 'voice_samples' / user_id / 'generated'
+        else:
+             output_dir = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}' / 'generated'
         output_dir.mkdir(parents=True, exist_ok=True)
         output_path = output_dir / output_filename
         

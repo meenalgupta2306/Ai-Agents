@@ -195,9 +195,15 @@ class VoiceService:
             
         # Also check for voice samples (allow any .wav file in the directory)
         if filename.endswith('.wav'):
+            # Check root of voice_samples (legacy samples)
             sample_path = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}' / filename
             if sample_path.exists():
                 return sample_path
+                
+            # Check generated subdirectory (new standardized location)
+            generated_sample_path = DOCUMENTS_DIR / 'voice_samples' / f'user_{user_id}' / 'generated' / filename
+            if generated_sample_path.exists():
+                return generated_sample_path
             
             # Check artifacts directory
             artifact_path = DOCUMENTS_DIR / 'artifacts' / 'audio' / filename

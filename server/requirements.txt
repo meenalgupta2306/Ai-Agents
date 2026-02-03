@@ -5,3 +5,5 @@ requests
 python-dotenv
 google-genai
 fastmcp
+ffmpeg-python
+Pillow
