@@ -175,12 +175,12 @@ Response Format:
                         break
                 messages.insert(1, {"role": msg['role'], "content": msg['content']})
             
-            # Extract and inject artifact context (hidden from user, visible to LLM)
+            # Extract and inject artifact context into system prompt (not as separate message)
             artifacts = extract_artifacts_from_history(session_messages)
             if artifacts:
                 artifact_context = build_artifact_context(artifacts)
-                # Insert before the current user message
-                messages.append({"role": "assistant", "content": artifact_context})
+                # Append to system message instead of adding as assistant message
+                messages[0]['content'] += f"\n\n{artifact_context}"
             
             # Run async orchestration
             async def run_chat():
@@ -192,6 +192,7 @@ Response Format:
                     max_iterations = 5
                     iteration = 0
                     final_response = None
+                    tool_calls_metadata = []  # Track tool calls for artifact extraction
                     
                     while iteration < max_iterations:
                         iteration += 1
@@ -232,7 +233,9 @@ Response Format:
                         
                         messages.append(assistant_msg)
                         
-                        # Execute tool calls
+                        # Execute tool calls and extract artifact metadata
+                        from .artifacts import extract_artifact_metadata
+                        
                         for tool_call in assistant_message.tool_calls:
                             tool_name = tool_call.function.name
                             
@@ -242,8 +245,21 @@ Response Format:
                             except:
                                 tool_args = eval(tool_call.function.arguments) if isinstance(tool_call.function.arguments, str) else tool_call.function.arguments
                             
+                            print("CALLING TOOL:", tool_name)
                             result = await chat_service.call_mcp_tool(tool_name, tool_args)
                             result_text = "".join([item.text for item in result if hasattr(item, 'text')])
+                            print("TOOL RESULT:", result_text)
+                            
+                            # Extract artifact metadata from tool result
+                            artifact = extract_artifact_metadata(tool_name, result_text, tool_args)
+                            print(f"ARTIFACT EXTRACTED for {tool_name}:", artifact)
+                            if artifact:
+                                tool_calls_metadata.append({
+                                    "name": tool_name,
+                                    "arguments": tool_args,
+                                    "artifact": artifact
+                                })
+                                print(f"Added artifact to metadata: {artifact}")
                             
                             messages.append({
                                 "role": "tool",
@@ -252,14 +268,20 @@ Response Format:
                                 "content": result_text
                             })
                     
-                    return final_response or "I apologize, but I couldn't generate a response."
+                    return final_response or "I apologize, but I couldn't generate a response.", tool_calls_metadata
                 
                 finally:
                     if chat_service:
                         await chat_service.cleanup()
             
-            response_text = asyncio.run(run_chat())
-            storage.save_message(user_email, session_id, "assistant", response_text)
+            response_text, tool_calls_metadata = asyncio.run(run_chat())
+            
+            # Save assistant message with artifact metadata if any
+            metadata = None
+            if tool_calls_metadata:
+                metadata = {"tool_calls": tool_calls_metadata}
+            
+            storage.save_message(user_email, session_id, "assistant", response_text, metadata)
             
             return {
                 "type": "message",

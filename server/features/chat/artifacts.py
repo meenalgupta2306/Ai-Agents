@@ -135,6 +135,35 @@ def extract_artifact_metadata(tool_name: str, result_text: str, tool_args: dict)
                 'created_at': datetime.utcnow().isoformat() + 'Z'
             }
     
+    elif tool_name == 'voice_tool':
+        # voice_tool returns JSON with artifact_path field
+        try:
+            import json
+            result_data = json.loads(result_text)
+            if result_data.get('status') == 'SUCCESS' and 'artifact_path' in result_data:
+                file_path = result_data['artifact_path']
+                return {
+                    'type': 'audio_speech',
+                    'format': 'wav',
+                    'path': file_path,
+                    'filename': file_path.split('/')[-1],
+                    'text': tool_args.get('text', '')[:100],  # First 100 chars of spoken text
+                    'created_at': datetime.utcnow().isoformat() + 'Z'
+                }
+        except (json.JSONDecodeError, KeyError):
+            # Fallback: try to extract from LOCATION: format in message
+            match = re.search(r'LOCATION:\s*(.+\.wav)', result_text)
+            if match:
+                file_path = match.group(1)
+                return {
+                    'type': 'audio_speech',
+                    'format': 'wav',
+                    'path': file_path,
+                    'filename': file_path.split('/')[-1],
+                    'text': tool_args.get('text', '')[:100],
+                    'created_at': datetime.utcnow().isoformat() + 'Z'
+                }
+    
     # Add more tool types as needed
     
     return None

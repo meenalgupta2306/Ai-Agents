@@ -59,7 +59,8 @@ const Chat = () => {
                 id: idx,
                 text: msg.content,
                 type: msg.role === 'user' ? 'user' : 'ai',
-                timestamp: msg.timestamp
+                timestamp: msg.timestamp,
+                metadata: msg.metadata // Include metadata for artifacts
             }));
 
             setMessages(formattedMessages);
@@ -207,6 +208,7 @@ const Chat = () => {
                                 message={msg.text}
                                 type={msg.type}
                                 timestamp={msg.timestamp}
+                                metadata={msg.metadata}
                             />
                         ))}
 

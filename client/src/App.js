@@ -5,6 +5,7 @@ import UserProfileDropdown from './components/UserProfileDropdown';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import LinkedInOAuthCallback from './pages/LinkedInOAuthCallback';
+import VoiceSetup from './pages/VoiceSetup';
 import './App.css';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Chat />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/voice-setup" element={<VoiceSetup />} />
               <Route path="/oauth/linkedin/callback" element={<LinkedInOAuthCallback />} />
             </Routes>
           </main>

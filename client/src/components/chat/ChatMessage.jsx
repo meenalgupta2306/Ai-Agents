@@ -1,7 +1,7 @@
 import React from 'react';
 import './ChatMessage.css';
 
-const ChatMessage = ({ message, type, timestamp }) => {
+const ChatMessage = ({ message, type, timestamp, metadata }) => {
     const isUser = type === 'user';
 
     const handleReportClick = async (filename) => {
@@ -38,9 +38,32 @@ const ChatMessage = ({ message, type, timestamp }) => {
         }
     };
 
+    const renderAudioArtifact = (artifact) => {
+        // Extract user_id from path (e.g., "documents/artifacts/audio/speech_...")
+        // For now, use test@example.com as default
+        const userId = 'test_example_com';
+        const filename = artifact.filename;
+        const audioUrl = `http://localhost:3001/api/voice/audio/${userId}/${filename}`;
+
+        return (
+            <div className="audio-artifact" style={{ marginTop: '10px' }}>
+                <div style={{ fontSize: '14px', marginBottom: '5px', color: '#666' }}>
+                    🎵 Generated Audio
+                </div>
+                <audio controls src={audioUrl} style={{ width: '100%', maxWidth: '400px' }} />
+                {artifact.text && (
+                    <div style={{ fontSize: '12px', marginTop: '5px', color: '#888', fontStyle: 'italic' }}>
+                        "{artifact.text}..."
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderMessage = () => {
         // Debug: log the raw message
         console.log('Raw message:', message);
+        console.log('Message metadata:', metadata);
 
         // Try to parse as JSON
         try {
@@ -79,10 +102,23 @@ const ChatMessage = ({ message, type, timestamp }) => {
         return message;
     };
 
+    // Check for audio artifacts in metadata
+    const audioArtifacts = metadata?.tool_calls?.filter(
+        tc => tc.artifact?.type === 'audio_speech'
+    ) || [];
+
     return (
         <div className={`chat-message ${isUser ? 'user-message' : 'ai-message'}`}>
             <div className="message-bubble">
                 <div className="message-text">{renderMessage()}</div>
+
+                {/* Render audio artifacts */}
+                {audioArtifacts.map((toolCall, index) => (
+                    <div key={index}>
+                        {renderAudioArtifact(toolCall.artifact)}
+                    </div>
+                ))}
+
                 {timestamp && (
                     <div className="message-timestamp">
                         {new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

@@ -104,7 +104,7 @@ class ChatStorage:
             'messages': []
         }
     
-    def save_message(self, user_email: str, session_id: str, role: str, content: str) -> bool:
+    def save_message(self, user_email: str, session_id: str, role: str, content: str, metadata: dict = None) -> bool:
         """Add a message to a session"""
         data = self._load_data()
         
@@ -117,6 +117,9 @@ class ChatStorage:
             'content': content,
             'timestamp': now
         }
+        
+        if metadata:
+            message['metadata'] = metadata
         
         data[user_email][session_id]['messages'].append(message)
         data[user_email][session_id]['updated_at'] = now

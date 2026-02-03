@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from mcp.server.fastmcp import FastMCP
-from tools import research_tool, image_tool, linkedin_tool, accounts_tool
+from tools import research_tool, image_tool, linkedin_tool, accounts_tool, voice_tool
 
 import logging
 
@@ -86,6 +86,39 @@ def get_connected_accounts(user_email: str) -> str:
         A JSON string with account details (platform, name, type, accountId).
     """
     return accounts_tool.accounts_tool(user_email)
+
+
+@mcp.tool("generate_speech")
+def generate_speech(text: str, user_email: str = "test@example.com"):
+    """
+    Generates speech in the user's cloned voice using their voice sample.
+    
+    IMPORTANT: User must have uploaded a voice sample first!
+    If no sample exists, this will return an error asking them to upload one.
+    
+    Args:
+        text: The text to convert to speech (max 5000 characters)
+        user_email: Email of the user (defaults to test@example.com)
+        
+    Returns:
+        JSON with status, audio URL, and playback instructions.
+        
+    Example response on success:
+        {
+            "status": "SUCCESS",
+            "message": "Speech generated successfully!",
+            "audio_url": "http://localhost:3001/api/voice/audio/...",
+            "playback_instructions": "You can play the audio at: ..."
+        }
+        
+    Example response when no sample exists:
+        {
+            "status": "ERROR",
+            "message": "No voice sample found. Please upload a voice sample first...",
+            "requires_sample": true
+        }
+    """
+    return voice_tool.voice_tool(text, user_email)
 
 
 if __name__ == "__main__":

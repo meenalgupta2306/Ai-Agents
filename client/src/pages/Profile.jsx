@@ -4,6 +4,7 @@ import axios from 'axios';
 import PlatformCard from '../components/PlatformCard';
 import ConnectedAccountsList from '../components/ConnectedAccountsList';
 import AccountSelectionModal from '../components/AccountSelectionModal';
+import voiceService from '../services/voiceService';
 import './Profile.css';
 
 const API_BASE_URL = 'http://localhost:3001';
@@ -21,6 +22,9 @@ const Profile = () => {
     const [accountSelectionData, setAccountSelectionData] = useState(null);
     const [isConnectingAccounts, setIsConnectingAccounts] = useState(false);
 
+    // Voice sample state
+    const [voiceStatus, setVoiceStatus] = useState({ has_sample: false, loading: true });
+
     useEffect(() => {
         if (user?.email) {
             const name = user.email.split('@')[0];
@@ -31,6 +35,43 @@ const Profile = () => {
             setDisplayName(formattedName);
         }
     }, [user]);
+
+    const getUserId = useCallback(() => {
+        if (user?.id) return user.id;
+        if (user?._id) return user._id;
+        if (user?.sub) return user.sub;
+        // Fallback: generate ID from email (matching VoiceSetup.jsx logic)
+        if (user?.email) return user.email.replace('@', '_').replace('.', '_');
+        return null;
+    }, [user]);
+
+    // Fetch voice sample status
+    useEffect(() => {
+        const checkVoice = async () => {
+            const userId = getUserId();
+
+            if (userId) {
+                try {
+                    const status = await voiceService.checkVoiceSample(userId);
+                    const count = status.metadata?.samples?.length || (status.has_sample ? 1 : 0);
+                    setVoiceStatus({
+                        has_sample: status.has_sample,
+                        sample_count: count,
+                        loading: false
+                    });
+                } catch (error) {
+                    console.error('Error checking voice sample:', error);
+                    setVoiceStatus({ has_sample: false, sample_count: 0, loading: false });
+                }
+            } else {
+                setVoiceStatus({ has_sample: false, sample_count: 0, loading: false });
+            }
+        };
+
+        if (user) {
+            checkVoice();
+        }
+    }, [user, getUserId]);
 
     const fetchAccounts = useCallback(async () => {
         setIsLoadingAccounts(true);
@@ -238,6 +279,45 @@ const Profile = () => {
                                 disabled
                                 className="input"
                             />
+                        </div>
+
+                        <div className="voice-sample-section">
+                            <h3>🎤 Voice Sample</h3>
+                            <p className="section-description">
+                                {voiceStatus.has_sample
+                                    ? "Your voice sample is uploaded and ready for cloning."
+                                    : "Upload a voice sample to enable AI-generated speech in your voice"
+                                }
+                            </p>
+
+                            {voiceStatus.loading ? (
+                                <p>Loading voice status...</p>
+                            ) : voiceStatus.has_sample ? (
+                                <div className="voice-audio-player">
+                                    <div className="voice-status-info" style={{ marginBottom: '10px', fontSize: '0.9em' }}>
+                                        <strong>{voiceStatus.sample_count} clip{voiceStatus.sample_count !== 1 ? 's' : ''} uploaded.</strong>
+                                        {voiceStatus.sample_count < 3 && (
+                                            <span style={{ color: '#f59e0b', marginLeft: '8px' }}>
+                                                ⚠️ Recommended: 3+ clips
+                                            </span>
+                                        )}
+                                    </div>
+                                    <audio
+                                        controls
+                                        src={voiceService.getAudioUrl(getUserId(), 'sample.wav')}
+                                        className="w-full mt-4 mb-4"
+                                    />
+                                    <div className="voice-actions">
+                                        <a href="/voice-setup" className="button secondary small">
+                                            {voiceStatus.sample_count < 5 ? "Record More Samples" : "Re-record Samples"}
+                                        </a>
+                                    </div>
+                                </div>
+                            ) : (
+                                <a href="/voice-setup" className="button secondary">
+                                    Go to Voice Setup
+                                </a>
+                            )}
                         </div>
 
                         <button className="button primary">Save Profile</button>

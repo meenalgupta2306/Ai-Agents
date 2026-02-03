@@ -1,4 +1,9 @@
-/__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+voice_service/venv/
+voice_service/voice_service.log
+voice_service/.env

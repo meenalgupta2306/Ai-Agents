@@ -14,10 +14,12 @@ CORS(app, supports_credentials=True)
 from features.linkedin.routes import linkedin_blueprint
 from features.oauth.routes import oauth_blueprint
 from features.chat.routes import chat_blueprint
+from features.voice.routes import voice_blueprint
 
 app.register_blueprint(linkedin_blueprint)
 app.register_blueprint(oauth_blueprint)
 app.register_blueprint(chat_blueprint)
+app.register_blueprint(voice_blueprint)
 
 
 # OAuth callback (stays in app.py as it's a redirect endpoint)
