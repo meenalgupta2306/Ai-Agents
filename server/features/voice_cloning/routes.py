@@ -156,9 +156,10 @@ def generate_speech():
         temperature = float(data.get('temperature', 0.85))
         speed = float(data.get('speed', 1.0))
         repetition_penalty = float(data.get('repetition_penalty', 2.0))
+        model = data.get('model')  # Optional, service will handle default if None
         
         success, message, record = voice_cloning_service.generate_speech(
-            set_id, text, temperature, speed, repetition_penalty, source='web'
+            set_id, text, temperature, speed, repetition_penalty, source='web', model=model
         )
         
         if success:
@@ -196,7 +197,10 @@ def get_generation_history(set_id):
                     'set_id': r.set_id,
                     'generated_at': r.generated_at,
                     'reference_clips_used': r.reference_clips_used,
-                    'config': r.config
+                    'generated_at': r.generated_at,
+                    'reference_clips_used': r.reference_clips_used,
+                    'config': r.config,
+                    'model': r.model
                 }
                 for r in history
             ]

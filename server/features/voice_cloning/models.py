@@ -33,7 +33,9 @@ class GenerationRecord:
     generated_at: str
     reference_clips_used: int
     config: dict
+    config: dict
     source: str = 'web'
+    model: str = 'coqui-xtts-v2'
 
 
 @dataclass

@@ -22,6 +22,7 @@ const VoiceCloningDemo = () => {
     const navigate = useNavigate();
     const [sampleSets, setSampleSets] = useState([]);
     const [selectedSetId, setSelectedSetId] = useState('');
+    const [selectedModel, setSelectedModel] = useState('coqui-xtts-v2');
     const [selectionMode, setSelectionMode] = useState('profile'); // 'profile', 'library', 'new'
     const [newSetSamples, setNewSetSamples] = useState([]);
     const [currentSampleText, setCurrentSampleText] = useState('');
@@ -156,7 +157,11 @@ const VoiceCloningDemo = () => {
             const response = await fetch('http://localhost:3001/api/voice-cloning/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ set_id: selectedSetId, text })
+                body: JSON.stringify({
+                    set_id: selectedSetId,
+                    text,
+                    model: selectedModel
+                })
             });
             const data = await response.json();
             if (data.status === 'success') {
@@ -184,7 +189,9 @@ const VoiceCloningDemo = () => {
         // If it's a demo set, require minimum samples
         if (set.set_type === 'demo') {
             const count = set.total_samples || 0;
-            if (count < 3) return false;
+            // Minimax only needs 1 sample, Coqui needs 3
+            const minRequired = selectedModel === 'minimax-t2a' ? 1 : 3;
+            if (count < minRequired) return false;
         }
 
         return true;
@@ -281,7 +288,7 @@ const VoiceCloningDemo = () => {
                                             <div className="upload-section compact-upload">
                                                 <p className="samples-count">
                                                     Current samples: <strong>{sampleCount}</strong>/5
-                                                    {sampleCount < 3 && <span className="warning-badge"> (Min 3 required)</span>}
+                                                    {sampleCount < (selectedModel === 'minimax-t2a' ? 1 : 3) && <span className="warning-badge"> (Min {selectedModel === 'minimax-t2a' ? 1 : 3} required)</span>}
                                                 </p>
 
                                                 {sampleCount < 5 && !recordedBlob && currentSampleText && (
@@ -310,7 +317,7 @@ const VoiceCloningDemo = () => {
                                                                     📤 Upload Recording
                                                                 </button>
                                                             )}
-                                                            
+
                                                         </div>
                                                     </div>
                                                 )}
@@ -319,6 +326,18 @@ const VoiceCloningDemo = () => {
                                     )}
 
                                     <div className="workbench-input">
+                                        <div className="model-selector-container">
+                                            <label>Select Model:</label>
+                                            <select
+                                                className="model-select"
+                                                value={selectedModel}
+                                                onChange={(e) => setSelectedModel(e.target.value)}
+                                            >
+                                                <option value="coqui-xtts-v2">Open Source (Coqui XTTS v2)</option>
+                                                <option value="minimax-t2a">Minimax (Text-to-Audio)</option>
+                                            </select>
+                                        </div>
+
                                         <div className="text-area-container">
                                             <label>Enter Text to Generate:</label>
                                             <textarea
@@ -341,8 +360,8 @@ const VoiceCloningDemo = () => {
                                         </div>
                                     </div>
 
-                                    {selectedSetId && selectionMode === 'new' && newSetSamples.length < 3 && (
-                                        <p className="warning-text">⚠️ Please upload at least 3 samples to enable generation.</p>
+                                    {selectedSetId && selectionMode === 'new' && newSetSamples.length < (selectedModel === 'minimax-t2a' ? 1 : 3) && (
+                                        <p className="warning-text">⚠️ Please upload at least {selectedModel === 'minimax-t2a' ? 1 : 3} samples to enable generation.</p>
                                     )}
 
                                     {/* Messages */}
@@ -383,6 +402,9 @@ const VoiceCloningDemo = () => {
                                                     <div key={index} className="history-item-compact">
                                                         <div className="history-meta-compact">
                                                             <span className="date">{new Date(item.generated_at).toLocaleTimeString()}</span>
+                                                            <span className={`model-badge ${item.model === 'minimax-t2a' ? 'minimax' : 'coqui'}`}>
+                                                                {item.model === 'minimax-t2a' ? 'Minimax' : 'Coqui'}
+                                                            </span>
                                                         </div>
                                                         <div className="history-content-compact">
                                                             <div className="text-preview">"{item.text.substring(0, 60)}{item.text.length > 60 ? '...' : ''}"</div>

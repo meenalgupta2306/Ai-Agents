@@ -24,7 +24,7 @@ app.register_blueprint(voice_blueprint)
 app.register_blueprint(voice_cloning_bp)
 
 # Initialize voice cloning service
-DOCUMENTS_DIR = os.getenv('DOCUMENTS_DIR', './documents')
+DOCUMENTS_DIR = os.getenv('DOCUMENTS_DIR', os.path.join(os.path.dirname(__file__), 'documents'))
 VOICE_SERVICE_URL = os.getenv('VOICE_SERVICE_URL', 'http://localhost:5002')
 init_voice_cloning_service(DOCUMENTS_DIR, VOICE_SERVICE_URL)
 
