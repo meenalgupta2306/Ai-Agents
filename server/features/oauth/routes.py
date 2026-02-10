@@ -26,6 +26,27 @@ def connect_linkedin_accounts():
     return jsonify(result), status
 
 
+@oauth_blueprint.route("/meta/init", methods=["GET"])
+def meta_oauth_init():
+    controller = OAuthController()
+    result, status = controller.meta_oauth_init()
+    return jsonify(result), status
+
+
+@oauth_blueprint.route("/meta/finalize", methods=["POST"])
+def meta_oauth_finalize():
+    controller = OAuthController()
+    result, status = controller.meta_oauth_finalize()
+    return jsonify(result), status
+
+
+@oauth_blueprint.route("/meta/connect-accounts", methods=["POST"])
+def connect_meta_accounts():
+    controller = OAuthController()
+    result, status = controller.connect_meta_accounts()
+    return jsonify(result), status
+
+
 @oauth_blueprint.route("/connected-accounts", methods=["GET"])
 def get_connected_accounts():
     controller = OAuthController()

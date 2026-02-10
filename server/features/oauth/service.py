@@ -20,6 +20,10 @@ class OAuthService:
         self.linkedin_client_id = os.getenv("CLIENT_ID")
         self.linkedin_client_secret = os.getenv("CLIENT_SECRET")
         self.linkedin_redirect_uri = os.getenv("REDIRECT_URI")
+        
+        self.meta_app_id = os.getenv("META_APP_ID")
+        self.meta_app_secret = os.getenv("META_APP_SECRET")
+        self.meta_redirect_uri = os.getenv("META_REDIRECT_URI")
     
     def get_linkedin_auth_url(self, state: str = None) -> str:
         """Generate LinkedIn OAuth authorization URL"""
@@ -55,6 +59,29 @@ class OAuthService:
         }
         
         return "https://www.linkedin.com/oauth/v2/authorization?" + urllib.parse.urlencode(params)
+    
+    def get_meta_auth_url(self, state: str = None) -> str:
+        """Generate Meta (Facebook) OAuth authorization URL"""
+        import urllib.parse
+        
+        scopes = [
+            'ads_management',
+            'ads_read',
+            # 'read_insights',
+            'business_management',
+            'public_profile',
+            # 'email'
+        ]
+        
+        params = {
+            "client_id": self.meta_app_id,
+            "redirect_uri": self.meta_redirect_uri,
+            "scope": ",".join(scopes),
+            "state": state or str(uuid.uuid4()),
+            "response_type": "code"
+        }
+        
+        return "https://www.facebook.com/v18.0/dialog/oauth?" + urllib.parse.urlencode(params)
     
     def load_accounts(self) -> Dict:
         """Load all connected accounts from JSON file"""

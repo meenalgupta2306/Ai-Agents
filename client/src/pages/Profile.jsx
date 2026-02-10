@@ -116,6 +116,7 @@ const Profile = () => {
                 console.log('Organizations:', event.data.organizations);
 
                 setAccountSelectionData({
+                    platform: 'linkedin',
                     profile: event.data.profile,
                     organizations: event.data.organizations || [],
                     tokenSessionId: event.data.tokenSessionId,
@@ -125,6 +126,21 @@ const Profile = () => {
             } else if (event.data && event.data.type === 'LINKEDIN_OAUTH_ERROR') {
                 console.error('LinkedIn OAuth Error:', event.data.error);
                 alert('Error: ' + (event.data.error || 'Failed to connect LinkedIn account'));
+            } else if (event.data && event.data.type === 'META_OAUTH_SUCCESS') {
+                console.log('Meta OAuth Success! Profile:', event.data.profile);
+                console.log('Ad Accounts:', event.data.adAccounts);
+
+                setAccountSelectionData({
+                    platform: 'meta',
+                    profile: event.data.profile,
+                    adAccounts: event.data.adAccounts || [],
+                    tokenSessionId: event.data.tokenSessionId,
+                });
+                setShowAccountModal(true);
+                console.log('showAccountModal set to true');
+            } else if (event.data && event.data.type === 'META_OAUTH_ERROR') {
+                console.error('Meta OAuth Error:', event.data.error);
+                alert('Error: ' + (event.data.error || 'Failed to connect Meta account'));
             }
         };
 
@@ -164,14 +180,37 @@ const Profile = () => {
         }
     };
 
-    const handleConnectAccounts = async (personal, selectedOrgs, profile, tokenSessionId) => {
+    const handleMetaClick = async () => {
+        setIsConnecting(true);
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/oauth/meta/init`, {
+                withCredentials: true
+            });
+            if (response.data.success && response.data.url) {
+                openOAuthPopup(response.data.url);
+            } else {
+                throw new Error('Failed to get authorization URL');
+            }
+        } catch (error) {
+            console.error('Error initializing Meta OAuth:', error);
+            alert('Failed to initialize Meta connection');
+        } finally {
+            setIsConnecting(false);
+        }
+    };
+
+    const handleConnectAccounts = async (platform, personal, selectedItems, profile, tokenSessionId) => {
         setIsConnectingAccounts(true);
         try {
-            const response = await axios.post(
-                `${API_BASE_URL}/api/oauth/linkedin/connect-accounts`,
-                { personal, organizations: selectedOrgs, profile, tokenSessionId },
-                { withCredentials: true }
-            );
+            const endpoint = platform === 'linkedin'
+                ? `${API_BASE_URL}/api/oauth/linkedin/connect-accounts`
+                : `${API_BASE_URL}/api/oauth/meta/connect-accounts`;
+
+            const payload = platform === 'linkedin'
+                ? { personal, organizations: selectedItems, profile, tokenSessionId }
+                : { personal, adAccounts: selectedItems, profile, tokenSessionId };
+
+            const response = await axios.post(endpoint, payload, { withCredentials: true });
 
             if (response.data.success) {
                 const accountCount = response.data.accounts.length;
@@ -208,10 +247,13 @@ const Profile = () => {
     const handleReconnect = (platform) => {
         if (platform === 'linkedin') {
             handleLinkedInClick();
+        } else if (platform === 'meta') {
+            handleMetaClick();
         }
     };
 
     const linkedinAccounts = accounts.filter(a => a.platform === 'linkedin');
+    const metaAccounts = accounts.filter(a => a.platform === 'meta');
 
     const getInitials = (email) => {
         if (!email) return 'CU';
@@ -345,6 +387,19 @@ const Profile = () => {
                                     onClick={handleLinkedInClick}
                                 />
                                 <PlatformCard
+                                    platform="meta"
+                                    name="Meta"
+                                    icon={
+                                        <svg className="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                        </svg>
+                                    }
+                                    isConnected={metaAccounts.length > 0}
+                                    connectedCount={metaAccounts.length}
+                                    isLoading={isConnecting}
+                                    onClick={handleMetaClick}
+                                />
+                                <PlatformCard
                                     platform="twitter"
                                     name="Twitter / X"
                                     icon={
@@ -379,8 +434,10 @@ const Profile = () => {
                 <AccountSelectionModal
                     open={showAccountModal}
                     onOpenChange={setShowAccountModal}
+                    platform={accountSelectionData.platform}
                     profile={accountSelectionData.profile}
                     organizations={accountSelectionData.organizations}
+                    adAccounts={accountSelectionData.adAccounts}
                     tokenSessionId={accountSelectionData.tokenSessionId}
                     connectedAccounts={accounts}
                     onConnect={handleConnectAccounts}

@@ -16,12 +16,14 @@ from features.oauth.routes import oauth_blueprint
 from features.chat.routes import chat_blueprint
 from features.voice.routes import voice_blueprint
 from features.voice_cloning import voice_cloning_bp, init_voice_cloning_service
+from features.meta.routes import meta_blueprint
 
 app.register_blueprint(linkedin_blueprint)
 app.register_blueprint(oauth_blueprint)
 app.register_blueprint(chat_blueprint)
 app.register_blueprint(voice_blueprint)
 app.register_blueprint(voice_cloning_bp)
+app.register_blueprint(meta_blueprint)
 
 # Initialize voice cloning service
 DOCUMENTS_DIR = os.getenv('DOCUMENTS_DIR', os.path.join(os.path.dirname(__file__), 'documents'))

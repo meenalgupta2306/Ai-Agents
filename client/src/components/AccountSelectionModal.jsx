@@ -4,46 +4,54 @@ import './AccountSelectionModal.css';
 const AccountSelectionModal = ({
     open,
     onOpenChange,
+    platform = 'linkedin',
     profile,
     organizations,
+    adAccounts,
     tokenSessionId,
     connectedAccounts,
     onConnect,
     isLoading
 }) => {
     const [selectedPersonal, setSelectedPersonal] = useState(false);
-    const [selectedOrgs, setSelectedOrgs] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]);
 
     if (!open) return null;
 
     const isPersonalConnected = connectedAccounts.some(
-        acc => acc.platform === 'linkedin' && acc.type === 'personal' && acc.accountId === profile.urn
+        acc => acc.platform === platform && acc.type === 'personal' && acc.accountId === (profile.urn || profile.id)
     );
 
-    const isOrgConnected = (orgUrn) => {
+    const isItemConnected = (itemId) => {
+        const accountType = platform === 'linkedin' ? 'organization' : 'ad_account';
         return connectedAccounts.some(
-            acc => acc.platform === 'linkedin' && acc.type === 'organization' && acc.accountId === orgUrn
+            acc => acc.platform === platform && acc.type === accountType && acc.accountId === itemId
         );
     };
 
-    const handleOrgToggle = (org) => {
-        if (isOrgConnected(org.urn)) return;
+    const handleItemToggle = (item) => {
+        const itemId = item.urn || item.id;
+        if (isItemConnected(itemId)) return;
 
-        setSelectedOrgs(prev => {
-            const exists = prev.find(o => o.urn === org.urn);
+        setSelectedItems(prev => {
+            const exists = prev.find(i => (i.urn || i.id) === itemId);
             if (exists) {
-                return prev.filter(o => o.urn !== org.urn);
+                return prev.filter(i => (i.urn || i.id) !== itemId);
             } else {
-                return [...prev, org];
+                return [...prev, item];
             }
         });
     };
 
     const handleConnect = () => {
-        onConnect(selectedPersonal, selectedOrgs, profile, tokenSessionId);
+        onConnect(platform, selectedPersonal, selectedItems, profile, tokenSessionId);
     };
 
-    const canConnect = selectedPersonal || selectedOrgs.length > 0;
+    const canConnect = selectedPersonal || selectedItems.length > 0;
+
+    const items = platform === 'linkedin' ? organizations : adAccounts;
+    const itemsLabel = platform === 'linkedin' ? 'Organizations' : 'Ad Accounts';
+    const itemIcon = platform === 'linkedin' ? '🏢' : '📊';
 
     return (
         <>
@@ -77,33 +85,37 @@ const AccountSelectionModal = ({
                         </label>
                     </div>
 
-                    {/* Organizations */}
-                    {organizations && organizations.length > 0 && (
+                    {/* Items (Organizations or Ad Accounts) */}
+                    {items && items.length > 0 && (
                         <>
                             <div className="section-divider">
-                                <span>Organizations</span>
+                                <span>{itemsLabel}</span>
                             </div>
-                            {organizations.map((org) => {
-                                const connected = isOrgConnected(org.urn);
-                                const selected = selectedOrgs.find(o => o.urn === org.urn);
+                            {items.map((item) => {
+                                const itemId = item.urn || item.id;
+                                const connected = isItemConnected(itemId);
+                                const selected = selectedItems.find(i => (i.urn || i.id) === itemId);
 
                                 return (
-                                    <div key={org.urn} className={`account-option ${connected ? 'disabled' : ''}`}>
+                                    <div key={itemId} className={`account-option ${connected ? 'disabled' : ''}`}>
                                         <input
                                             type="checkbox"
-                                            id={`org-${org.id}`}
+                                            id={`item-${itemId}`}
                                             checked={selected || connected}
-                                            onChange={() => handleOrgToggle(org)}
+                                            onChange={() => handleItemToggle(item)}
                                             disabled={connected}
                                         />
-                                        <label htmlFor={`org-${org.id}`}>
+                                        <label htmlFor={`item-${itemId}`}>
                                             <div className="account-details">
-                                                <div className="account-icon organization">🏢</div>
+                                                <div className="account-icon organization">{itemIcon}</div>
                                                 <div>
-                                                    <div className="account-title">{org.name}</div>
-                                                    <div className="account-subtitle">Organization</div>
-                                                    {org.vanityName && (
-                                                        <div className="account-email">linkedin.com/company/{org.vanityName}</div>
+                                                    <div className="account-title">{item.name}</div>
+                                                    <div className="account-subtitle">{platform === 'linkedin' ? 'Organization' : 'Ad Account'}</div>
+                                                    {item.vanityName && (
+                                                        <div className="account-email">linkedin.com/company/{item.vanityName}</div>
+                                                    )}
+                                                    {item.currency && (
+                                                        <div className="account-email">Currency: {item.currency}</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -129,7 +141,7 @@ const AccountSelectionModal = ({
                         onClick={handleConnect}
                         disabled={!canConnect || isLoading}
                     >
-                        {isLoading ? 'Connecting...' : `Connect ${(selectedPersonal ? 1 : 0) + selectedOrgs.length} Account${(selectedPersonal ? 1 : 0) + selectedOrgs.length !== 1 ? 's' : ''}`}
+                        {isLoading ? 'Connecting...' : `Connect ${(selectedPersonal ? 1 : 0) + selectedItems.length} Account${(selectedPersonal ? 1 : 0) + selectedItems.length !== 1 ? 's' : ''}`}
                     </button>
                 </div>
             </div>

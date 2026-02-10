@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from mcp.server.fastmcp import FastMCP
-from tools import research_tool, image_tool, linkedin_tool, accounts_tool, voice_tool
+from tools import research_tool, image_tool, linkedin_tool, accounts_tool, voice_tool, meta_tool
 
 import logging
 
@@ -119,6 +119,57 @@ def generate_speech(text: str, user_email: str = "test@example.com"):
         }
     """
     return voice_tool.voice_tool(text, user_email)
+
+
+@mcp.tool("create_meta_campaign")
+def create_meta_campaign(
+    account_id: str,
+    campaign_name: str,
+    objective: str,
+    user_email: str = "test@example.com",
+    status: str = "PAUSED",
+    special_ad_categories: list = None
+):
+    """
+    Creates a Meta (Facebook/Instagram) advertising campaign.
+    
+    IMPORTANT: You must first call get_connected_accounts to get the Meta account_id.
+    
+    Args:
+        account_id: The Meta ad account ID from get_connected_accounts (format: act_123456789)
+        campaign_name: Name for the campaign
+        objective: Campaign objective - one of:
+            - OUTCOME_TRAFFIC (drive traffic to website/app)
+            - OUTCOME_LEADS (generate leads)
+            - OUTCOME_SALES (drive sales/conversions)
+            - OUTCOME_ENGAGEMENT (increase engagement)
+            - OUTCOME_APP_PROMOTION (promote app installs)
+            - OUTCOME_AWARENESS (build brand awareness)
+        user_email: Email of the user (defaults to test@example.com)
+        status: Campaign status - ACTIVE, PAUSED, or ARCHIVED (default: PAUSED for safety)
+        special_ad_categories: List of special ad categories like ["EMPLOYMENT", "HOUSING", "CREDIT"] (default: [])
+        
+    Example workflow:
+        1. Call get_connected_accounts(user_email="test@example.com")
+        2. Find Meta account and get its accountId (e.g., "act_123456789")
+        3. Call create_meta_campaign(
+            account_id="act_123456789",
+            campaign_name="Summer Sale 2024",
+            objective="OUTCOME_TRAFFIC",
+            status="PAUSED"
+        )
+        
+    Returns:
+        JSON with status, campaign_id, and details.
+    """
+    return meta_tool.create_meta_campaign_tool(
+        account_id=account_id,
+        campaign_name=campaign_name,
+        objective=objective,
+        user_email=user_email,
+        status=status,
+        special_ad_categories=special_ad_categories
+    )
 
 
 if __name__ == "__main__":

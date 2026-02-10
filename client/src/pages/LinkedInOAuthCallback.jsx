@@ -4,10 +4,14 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:3001';
 
-const LinkedInOAuthCallback = () => {
+const OAuthCallback = () => {
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState('loading');
-    const [message, setMessage] = useState('Connecting to LinkedIn...');
+    const [message, setMessage] = useState('Connecting...');
+
+    // Determine platform from URL path
+    const platform = window.location.pathname.includes('meta') ? 'meta' : 'linkedin';
+    const platformName = platform === 'meta' ? 'Meta' : 'LinkedIn';
 
     useEffect(() => {
         const handleCallback = async () => {
@@ -15,19 +19,19 @@ const LinkedInOAuthCallback = () => {
             const error = searchParams.get('error');
             const state = searchParams.get('state');
 
-            // Handle error from LinkedIn
+            // Handle error from OAuth provider
             if (error) {
                 setStatus('error');
                 setMessage(
                     error.includes('access_denied')
-                        ? 'LinkedIn access was denied'
-                        : 'Failed to connect LinkedIn account'
+                        ? `${platformName} access was denied`
+                        : `Failed to connect ${platformName} account`
                 );
 
                 // Send error to parent window
                 if (window.opener) {
                     window.opener.postMessage(
-                        { type: 'LINKEDIN_OAUTH_ERROR', error: error },
+                        { type: `${platform.toUpperCase()}_OAUTH_ERROR`, error: error },
                         '*'
                     );
                 }
@@ -46,32 +50,57 @@ const LinkedInOAuthCallback = () => {
             }
 
             try {
-                // Call unified /finalize endpoint
-                setMessage('Fetching your LinkedIn accounts...');
+                // Call /finalize endpoint for the appropriate platform
+                setMessage(`Fetching your ${platformName} accounts...`);
+
+                const endpoint = platform === 'linkedin'
+                    ? `${API_BASE_URL}/api/oauth/linkedin/finalize`
+                    : `${API_BASE_URL}/api/oauth/meta/finalize`;
 
                 const response = await axios.post(
-                    `${API_BASE_URL}/api/oauth/linkedin/finalize`,
+                    endpoint,
                     { code, state },
                     { withCredentials: true }
                 );
 
                 if (response.data.success) {
                     setStatus('success');
-                    const { profile, organizations } = response.data;
-                    const accountCount = 1 + (organizations?.length || 0);
-                    setMessage(`Found ${accountCount} account${accountCount > 1 ? 's' : ''}!`);
 
-                    // Send data to parent window for account selection
-                    if (window.opener) {
-                        window.opener.postMessage(
-                            {
-                                type: 'LINKEDIN_UNIFIED_SUCCESS',
-                                profile: response.data.profile,
-                                organizations: response.data.organizations || [],
-                                tokenSessionId: response.data.tokenSessionId,
-                            },
-                            '*'
-                        );
+                    if (platform === 'linkedin') {
+                        const { profile, organizations } = response.data;
+                        const accountCount = 1 + (organizations?.length || 0);
+                        setMessage(`Found ${accountCount} account${accountCount > 1 ? 's' : ''}!`);
+
+                        // Send data to parent window for account selection
+                        if (window.opener) {
+                            window.opener.postMessage(
+                                {
+                                    type: 'LINKEDIN_UNIFIED_SUCCESS',
+                                    profile: response.data.profile,
+                                    organizations: response.data.organizations || [],
+                                    tokenSessionId: response.data.tokenSessionId,
+                                },
+                                '*'
+                            );
+                        }
+                    } else {
+                        // Meta
+                        const { profile, adAccounts } = response.data;
+                        const accountCount = 1 + (adAccounts?.length || 0);
+                        setMessage(`Found ${accountCount} account${accountCount > 1 ? 's' : ''}!`);
+
+                        // Send data to parent window for account selection
+                        if (window.opener) {
+                            window.opener.postMessage(
+                                {
+                                    type: 'META_OAUTH_SUCCESS',
+                                    profile: response.data.profile,
+                                    adAccounts: response.data.adAccounts || [],
+                                    tokenSessionId: response.data.tokenSessionId,
+                                },
+                                '*'
+                            );
+                        }
                     }
 
                     setTimeout(() => window.close(), 1500);
@@ -79,14 +108,14 @@ const LinkedInOAuthCallback = () => {
                     throw new Error(response.data.error || 'Connection failed');
                 }
             } catch (err) {
-                console.error('LinkedIn OAuth error:', err);
+                console.error(`${platformName} OAuth error:`, err);
                 setStatus('error');
-                setMessage(err.response?.data?.error || err.message || 'Failed to connect LinkedIn');
+                setMessage(err.response?.data?.error || err.message || `Failed to connect ${platformName}`);
 
                 // Send error to parent window
                 if (window.opener) {
                     window.opener.postMessage(
-                        { type: 'LINKEDIN_OAUTH_ERROR', error: err.message },
+                        { type: `${platform.toUpperCase()}_OAUTH_ERROR`, error: err.message },
                         '*'
                     );
                 }
@@ -120,7 +149,7 @@ const LinkedInOAuthCallback = () => {
                     <>
                         <div style={{
                             border: '3px solid #f3f3f3',
-                            borderTop: '3px solid #0077B5',
+                            borderTop: platform === 'linkedin' ? '3px solid #0077B5' : '3px solid #1877F2',
                             borderRadius: '50%',
                             width: '40px',
                             height: '40px',
@@ -161,4 +190,4 @@ const LinkedInOAuthCallback = () => {
     );
 };
 
-export default LinkedInOAuthCallback;
+export default OAuthCallback;

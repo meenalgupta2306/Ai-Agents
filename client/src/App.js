@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import UserProfileDropdown from './components/UserProfileDropdown';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
-import LinkedInOAuthCallback from './pages/LinkedInOAuthCallback';
+import OAuthCallback from './pages/LinkedInOAuthCallback';
 import VoiceSetup from './pages/VoiceSetup';
 import Solutions from './pages/Solutions';
 import VoiceCloningDemo from './pages/VoiceCloningDemo';
@@ -38,7 +38,8 @@ function App() {
               <Route path="/solutions" element={<Solutions />} />
               <Route path="/voice-cloning-demo" element={<VoiceCloningDemo />} />
               <Route path="/speaking-avatar" element={<SpeakingAvatar />} />
-              <Route path="/oauth/linkedin/callback" element={<LinkedInOAuthCallback />} />
+              <Route path="/oauth/linkedin/callback" element={<OAuthCallback />} />
+              <Route path="/oauth/meta/callback" element={<OAuthCallback />} />
             </Routes>
           </main>
         </div>

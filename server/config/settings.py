@@ -10,6 +10,11 @@ CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 FLASK_SECRET_KEY = os.getenv("FLASK_SECRET_KEY")
 
+# Meta OAuth
+META_APP_ID = os.getenv("META_APP_ID")
+META_APP_SECRET = os.getenv("META_APP_SECRET")
+META_REDIRECT_URI = os.getenv("META_REDIRECT_URI")
+
 # Paths
 DOCUMENT_PATH = os.getenv("DOCUMENT_PATH", "documents")
 
