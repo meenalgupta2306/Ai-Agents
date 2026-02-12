@@ -9,6 +9,7 @@ import VoiceSetup from './pages/VoiceSetup';
 import Solutions from './pages/Solutions';
 import VoiceCloningDemo from './pages/VoiceCloningDemo';
 import SpeakingAvatar from './pages/SpeakingAvatar';
+import DndTest from './pages/DndTest';
 import './App.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
               </div>
               <nav className="header-nav">
                 <Link to="/solutions" className="nav-link">Solutions</Link>
+                <Link to="/dnd-test" className="nav-link">DnD Test</Link>
               </nav>
               <div className="header-actions">
                 <UserProfileDropdown />
@@ -38,6 +40,7 @@ function App() {
               <Route path="/solutions" element={<Solutions />} />
               <Route path="/voice-cloning-demo" element={<VoiceCloningDemo />} />
               <Route path="/speaking-avatar" element={<SpeakingAvatar />} />
+              <Route path="/dnd-test" element={<DndTest />} />
               <Route path="/oauth/linkedin/callback" element={<OAuthCallback />} />
               <Route path="/oauth/meta/callback" element={<OAuthCallback />} />
             </Routes>

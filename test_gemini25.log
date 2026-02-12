@@ -1,0 +1,18 @@
+🚀 Starting content generation...
+✅ Started: {
+  "message": "Content generation started",
+  "session_id": "session_0e40eb9297a7",
+  "status": "started"
+}
+
+📊 Monitoring progress for session: session_0e40eb9297a7
+------------------------------------------------------------
+❌ ERROR: TTS generation failed: Sample set set_a6078dfe not found
+
+📦 Fetching final result...
+{
+  "message": "Session not found",
+  "status": "error"
+}
+
+✨ Done! Check documents/content_generation/session_0e40eb9297a7/

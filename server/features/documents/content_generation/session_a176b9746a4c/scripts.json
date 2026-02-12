@@ -1,0 +1,38 @@
+[
+  {
+    "scene_id": "intro",
+    "script": "We have 85 minus 37! We can't take 7 from 5, so we'll regroup.",
+    "word_count": 14,
+    "estimated_duration": 5.6
+  },
+  {
+    "scene_id": "scene_1",
+    "script": "We borrowed one ten from the eight, which leaves seven tens. So let's bring our seven up",
+    "word_count": 17,
+    "estimated_duration": 6.8
+  },
+  {
+    "scene_id": "scene_2",
+    "script": "Let's bring that one ten over here. Now we have ten plus five, which is fifteen",
+    "word_count": 16,
+    "estimated_duration": 6.4
+  },
+  {
+    "scene_id": "scene_3",
+    "script": "Okay, fifteen minus seven equals eight, so let's drag our eight down here",
+    "word_count": 13,
+    "estimated_duration": 5.2
+  },
+  {
+    "scene_id": "scene_4",
+    "script": "Now in the tens place, seven minus three is four, so let's bring it down",
+    "word_count": 15,
+    "estimated_duration": 6.0
+  },
+  {
+    "scene_id": "conclusion",
+    "script": "So, eighty-five minus thirty-seven equals forty-eight! Awesome work on this problem",
+    "word_count": 11,
+    "estimated_duration": 4.4
+  }
+]

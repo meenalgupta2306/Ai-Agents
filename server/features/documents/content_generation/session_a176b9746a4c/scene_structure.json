@@ -1,0 +1,88 @@
+{
+  "question_type": "subtraction_with_regrouping",
+  "total_duration": 31,
+  "scenes": [
+    {
+      "id": "intro",
+      "type": "intro",
+      "duration": 5,
+      "focus": "Introducing the subtraction problem 85 - 37.",
+      "teaching_strategy": "Read the problem aloud, starting with the ones column. Explain that we can't take 7 from 5, so we need to regroup or 'borrow'."
+    },
+    {
+      "id": "scene_1",
+      "type": "action",
+      "duration": 6,
+      "focus": "Borrowing from the tens place.",
+      "teaching_strategy": "Explain that we borrow one ten from the 8, leaving 7 tens. Drag the 7 to show the new value in the tens place.",
+      "action": {
+        "type": "drag",
+        "item_id": "7",
+        "zone_id": "stepnull_borrow_tens"
+      },
+      "timing": {
+        "pre_action": 2,
+        "action": 2,
+        "post_action": 2
+      }
+    },
+    {
+      "id": "scene_2",
+      "type": "action",
+      "duration": 6,
+      "focus": "Carrying the borrowed value to the ones place.",
+      "teaching_strategy": "The one ten we borrowed becomes 10 ones. We add it to the 5 we already have, making 15. Drag the 1 to show the new value in the ones place.",
+      "action": {
+        "type": "drag",
+        "item_id": "1",
+        "zone_id": "stepnull_borrow_ones_tens"
+      },
+      "timing": {
+        "pre_action": 2,
+        "action": 2,
+        "post_action": 2
+      }
+    },
+    {
+      "id": "scene_3",
+      "type": "action",
+      "duration": 5,
+      "focus": "Subtracting in the ones column.",
+      "teaching_strategy": "Now, we solve the ones column: 15 minus 7 equals 8. Drag the 8 into the ones place of the answer.",
+      "action": {
+        "type": "drag",
+        "item_id": "8",
+        "zone_id": "answer_ones"
+      },
+      "timing": {
+        "pre_action": 1.5,
+        "action": 2,
+        "post_action": 1.5
+      }
+    },
+    {
+      "id": "scene_4",
+      "type": "action",
+      "duration": 5,
+      "focus": "Subtracting in the tens column.",
+      "teaching_strategy": "Finally, we solve the tens column: 7 minus 3 equals 4. Drag the 4 into the tens place of the answer.",
+      "action": {
+        "type": "drag",
+        "item_id": "4",
+        "zone_id": "answer_tens"
+      },
+      "timing": {
+        "pre_action": 1.5,
+        "action": 2,
+        "post_action": 1.5
+      }
+    },
+    {
+      "id": "conclusion",
+      "type": "conclusion",
+      "duration": 4,
+      "focus": "Stating the final answer.",
+      "teaching_strategy": "Review the completed problem and state the final answer: 85 minus 37 equals 48."
+    }
+  ]
+}

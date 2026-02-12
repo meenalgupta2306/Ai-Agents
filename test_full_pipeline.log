@@ -1,0 +1,18 @@
+🚀 Starting content generation...
+✅ Started: {
+  "message": "Content generation started",
+  "session_id": "session_685659798bd6",
+  "status": "started"
+}
+
+📊 Monitoring progress for session: session_685659798bd6
+------------------------------------------------------------
+✅ COMPLETE!
+
+📦 Fetching final result...
+{
+  "message": "Session not found",
+  "status": "error"
+}
+
+✨ Done! Check documents/content_generation/session_685659798bd6/
