@@ -33,6 +33,7 @@ const VoiceCloningDemo = () => {
     const [success, setSuccess] = useState(null);
     const [generationHistory, setGenerationHistory] = useState([]);
     const [recordedBlob, setRecordedBlob] = useState(null);
+    const fileInputRef = React.useRef(null);
 
     useEffect(() => {
         loadSampleSets();
@@ -101,11 +102,12 @@ const VoiceCloningDemo = () => {
     const handleModeChange = (mode) => {
         setSelectionMode(mode);
         if (mode === 'new') {
-            setSelectedSetId(''); // Clear temporarily until set created
+            setSelectedSetId('');
             setNewSetSamples([]);
             setRecordedBlob(null);
             handleCreateNewSet();
         }
+        setRecordedBlob(null);
     };
 
     const handleSelectSet = (setId) => {
@@ -186,11 +188,9 @@ const VoiceCloningDemo = () => {
         const set = sampleSets.find(s => s.set_id === selectedSetId);
         if (!set) return false;
 
-        // If it's a demo set, require minimum samples
         if (set.set_type === 'demo') {
             const count = set.total_samples || 0;
-            // Minimax only needs 1 sample, Coqui needs 3
-            const minRequired = selectedModel === 'minimax-t2a' ? 1 : 3;
+            const minRequired = (selectedModel === 'minimax-t2a' || selectedModel === 'chatterbox-tts') ? 1 : 3;
             if (count < minRequired) return false;
         }
 
@@ -281,46 +281,79 @@ const VoiceCloningDemo = () => {
 
                             return (
                                 <>
-                                    {/* Management Section for Demo Sets */}
-                                    {isDemoSet && (
+                                    {/* Management Section for all sets */}
+                                    {sampleCount < 5 && (
                                         <div className="management-section">
-                                            <h3>🧪 Manage Voice Samples</h3>
+                                            <h3>{isDemoSet ? '🧪 Manage Voice Samples' : '➕ Add Voice Samples'}</h3>
                                             <div className="upload-section compact-upload">
                                                 <p className="samples-count">
                                                     Current samples: <strong>{sampleCount}</strong>/5
-                                                    {sampleCount < (selectedModel === 'minimax-t2a' ? 1 : 3) && <span className="warning-badge"> (Min {selectedModel === 'minimax-t2a' ? 1 : 3} required)</span>}
+                                                    {sampleCount < ((selectedModel === 'minimax-t2a' || selectedModel === 'chatterbox-tts') ? 1 : 3) && (
+                                                        <span className="warning-badge"> (Min {(selectedModel === 'minimax-t2a' || selectedModel === 'chatterbox-tts') ? 1 : 3} required)</span>
+                                                    )}
                                                 </p>
 
-                                                {sampleCount < 5 && !recordedBlob && currentSampleText && (
+                                                {!recordedBlob && currentSampleText && (
                                                     <div className="text-prompt-mini">
                                                         <p><strong>Read:</strong> "{currentSampleText}"</p>
                                                         <button className="btn-text-refresh" onClick={selectRandomText}>🔄</button>
                                                     </div>
                                                 )}
-                                                {!recordedBlob && <span className="instruction-text">Record a sample to add...</span>}
 
-                                                {sampleCount < 5 && (
-                                                    <div className="upload-row">
-                                                        <div className="recorder-wrapper">
-                                                            <AudioRecorder
-                                                                onRecordingComplete={setRecordedBlob}
-                                                                maxDuration={20}
-                                                            />
-                                                        </div>
+                                                <div className="upload-row">
+                                                    <div className="recorder-wrapper">
+                                                        <AudioRecorder
+                                                            onRecordingComplete={setRecordedBlob}
+                                                            maxDuration={20}
+                                                        />
+                                                    </div>
 
-                                                        <div className="upload-actions">
-                                                            {recordedBlob && (
+                                                    <div className="upload-divider">or</div>
+
+                                                    <div className="file-upload-wrapper">
+                                                        <input
+                                                            type="file"
+                                                            accept="audio/*"
+                                                            ref={fileInputRef}
+                                                            style={{ display: 'none' }}
+                                                            onChange={(e) => {
+                                                                const file = e.target.files[0];
+                                                                if (file) setRecordedBlob(file);
+                                                                e.target.value = '';
+                                                            }}
+                                                        />
+                                                        <button
+                                                            className="btn-file-upload"
+                                                            onClick={() => fileInputRef.current?.click()}
+                                                        >
+                                                            📁 Upload Audio File
+                                                        </button>
+                                                        <span className="file-hint">WAV, MP3, M4A supported</span>
+                                                    </div>
+
+                                                    <div className="upload-actions">
+                                                        {recordedBlob && (
+                                                            <div className="pending-upload">
+                                                                <span className="pending-label">
+                                                                    {recordedBlob.name ? `📎 ${recordedBlob.name}` : '🎤 Recording ready'}
+                                                                </span>
                                                                 <button
                                                                     className="btn-upload small"
                                                                     onClick={handleUploadSample}
                                                                 >
-                                                                    📤 Upload Recording
+                                                                    📤 Add Sample
                                                                 </button>
-                                                            )}
-
-                                                        </div>
+                                                                <button
+                                                                    className="btn-discard"
+                                                                    onClick={() => setRecordedBlob(null)}
+                                                                    title="Discard"
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                )}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -334,6 +367,7 @@ const VoiceCloningDemo = () => {
                                                 onChange={(e) => setSelectedModel(e.target.value)}
                                             >
                                                 <option value="coqui-xtts-v2">Open Source (Coqui XTTS v2)</option>
+                                                <option value="chatterbox-tts">Chatterbox (ResembleAI)</option>
                                                 <option value="minimax-t2a">Minimax (Text-to-Audio)</option>
                                             </select>
                                         </div>
@@ -360,8 +394,8 @@ const VoiceCloningDemo = () => {
                                         </div>
                                     </div>
 
-                                    {selectedSetId && selectionMode === 'new' && newSetSamples.length < (selectedModel === 'minimax-t2a' ? 1 : 3) && (
-                                        <p className="warning-text">⚠️ Please upload at least {selectedModel === 'minimax-t2a' ? 1 : 3} samples to enable generation.</p>
+                                    {selectedSetId && selectionMode === 'new' && newSetSamples.length < ((selectedModel === 'minimax-t2a' || selectedModel === 'chatterbox-tts') ? 1 : 3) && (
+                                        <p className="warning-text">⚠️ Please upload at least {(selectedModel === 'minimax-t2a' || selectedModel === 'chatterbox-tts') ? 1 : 3} samples to enable generation.</p>
                                     )}
 
                                     {/* Messages */}
@@ -402,8 +436,8 @@ const VoiceCloningDemo = () => {
                                                     <div key={index} className="history-item-compact">
                                                         <div className="history-meta-compact">
                                                             <span className="date">{new Date(item.generated_at).toLocaleTimeString()}</span>
-                                                            <span className={`model-badge ${item.model === 'minimax-t2a' ? 'minimax' : 'coqui'}`}>
-                                                                {item.model === 'minimax-t2a' ? 'Minimax' : 'Coqui'}
+                                                            <span className={`model-badge ${item.model === 'minimax-t2a' ? 'minimax' : item.model === 'chatterbox-tts' ? 'chatterbox' : 'coqui'}`}>
+                                                                {item.model === 'minimax-t2a' ? 'Minimax' : item.model === 'chatterbox-tts' ? 'Chatterbox' : 'Coqui'}
                                                             </span>
                                                         </div>
                                                         <div className="history-content-compact">

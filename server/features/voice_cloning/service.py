@@ -18,11 +18,13 @@ class VoiceCloningService:
         self.documents_dir = Path(documents_dir)
         self.voice_samples_dir = self.documents_dir / 'voice_samples'
         self.voice_service_url = voice_service_url
+        self.chatterbox_service_url = os.getenv('CHATTERBOX_SERVICE_URL', 'http://localhost:5003')
         
         # Provider Registry
         self.MODEL_PROVIDERS = {
             "coqui-xtts-v2": "coqui",
-            "minimax-t2a": "minimax"
+            "minimax-t2a": "minimax",
+            "chatterbox-tts": "chatterbox"
         }
         
     def _get_provider_for_model(self, model_id: str) -> str:
@@ -114,34 +116,46 @@ class VoiceCloningService:
             (success, message, sample_info)
         """
         set_dir = self.voice_samples_dir / set_id
-        
+
         if not set_dir.exists():
             return False, f"Sample set {set_id} not found", None
-            
-        # Forward to voice service for processing
-        files = {'audio_file': (audio_file.filename, audio_file.stream, audio_file.content_type)}
-        data = {'user_id': set_id}  # Use set_id as user_id for voice service
-        
+
         try:
-            response = requests.post(
-                f"{self.voice_service_url}/upload-sample",
-                files=files,
-                data=data,
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                sample_info = result.get('sample_info')
-                
-                if sample_info:
-                    return True, "Sample uploaded successfully", VoiceSample(**sample_info)
-                else:
-                    return True, "Sample uploaded successfully", None
-            else:
-                error_msg = response.json().get('error', 'Upload failed')
-                return False, error_msg, None
-                
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            ext = Path(audio_file.filename).suffix or '.wav'
+            filename = f'sample_{timestamp}{ext}'
+            save_path = set_dir / filename
+            audio_file.save(str(save_path))
+
+            file_size = save_path.stat().st_size
+
+            duration = 0.0
+            try:
+                from pydub import AudioSegment
+                seg = AudioSegment.from_file(str(save_path))
+                duration = len(seg) / 1000.0
+            except Exception:
+                pass
+
+            sample_info = {
+                'filename': filename,
+                'uploaded_at': datetime.now().isoformat(),
+                'duration_seconds': duration,
+                'file_size_bytes': file_size
+            }
+
+            metadata_path = set_dir / 'metadata.json'
+            metadata = {'samples': []}
+            if metadata_path.exists():
+                with open(metadata_path, 'r') as f:
+                    metadata = json.load(f)
+            metadata.setdefault('samples', []).append(sample_info)
+            metadata['total_samples'] = len(metadata['samples'])
+            with open(metadata_path, 'w') as f:
+                json.dump(metadata, f, indent=2)
+
+            return True, "Sample uploaded successfully", VoiceSample(**sample_info)
+
         except Exception as e:
             return False, f"Error uploading sample: {str(e)}", None
     
@@ -172,6 +186,8 @@ class VoiceCloningService:
                 return self._generate_coqui(set_id, text, temperature, speed, repetition_penalty, source, model)
             elif provider == "minimax":
                 return self._generate_minimax(set_id, text, temperature, speed, repetition_penalty, source, model)
+            elif provider == "chatterbox":
+                return self._generate_chatterbox(set_id, text, source, model)
             else:
                 return False, f"Unsupported provider for model {model}", None
 
@@ -217,6 +233,45 @@ class VoiceCloningService:
                 error_msg = response.json().get('error', 'Generation failed')
                 return False, error_msg, None
                 
+        except Exception as e:
+            raise e
+
+    def _generate_chatterbox(
+        self, set_id, text, source, model
+    ) -> Tuple[bool, str, Optional[GenerationRecord]]:
+        """Handle generation using local Chatterbox TTS service"""
+        payload = {
+            'user_id': set_id,
+            'text': text,
+            'exaggeration': 0.5,
+            'cfg_weight': 0.5
+        }
+
+        try:
+            response = requests.post(
+                f"{self.chatterbox_service_url}/generate",
+                json=payload,
+                timeout=300
+            )
+
+            if response.status_code == 200:
+                result = response.json()
+                record = GenerationRecord(
+                    audio_filename=result['audio_filename'],
+                    text=text,
+                    set_id=set_id,
+                    generated_at=datetime.now().isoformat(),
+                    reference_clips_used=result.get('reference_clips_used', 1),
+                    config=result.get('config', {}),
+                    source=source,
+                    model=model
+                )
+                self._log_generation(set_id, record)
+                return True, "Speech generated successfully", record
+            else:
+                error_msg = response.json().get('error', 'Generation failed')
+                return False, error_msg, None
+
         except Exception as e:
             raise e
 
