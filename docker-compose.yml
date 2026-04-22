@@ -1,0 +1,59 @@
+services:
+  # --- 1. Chatterbox TTS Service ---
+  chatterbox:
+    build: ./chatterbox_service
+    container_name: chatterbox-service
+    ports:
+      - "5003:5003"
+    environment:
+      - DOCUMENTS_DIR=/app/shared_documents
+    volumes:
+      - ./server/documents:/app/shared_documents
+      - chatterbox_model_cache:/root/.cache # Special volume to keep model weights
+
+  # --- 2. Voice (XTTS) Service ---
+  voice:
+    build: ./voice_service
+    container_name: voice-service
+    ports:
+      - "5002:5002"
+    environment:
+      - DOCUMENTS_DIR=/app/shared_documents
+      - COQUI_TOS_AGREED=1
+    volumes:
+      - ./server/documents:/app/shared_documents
+      - voice_model_cache:/root/.cache
+
+  # --- 3. Main Backend Server ---
+  server:
+    build: ./server
+    container_name: backend-server
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./server/.env
+    environment:
+      - PORT=3001
+      # We use the SERVICE NAME (chatterbox) instead of localhost
+      - CHATTERBOX_SERVICE_URL=http://chatterbox:5003
+      - VOICE_SERVICE_URL=http://voice:5002
+      - DOCUMENTS_DIR=/app/documents
+    volumes:
+      - ./server/documents:/app/documents
+    depends_on:
+      - chatterbox
+      - voice
+
+  # --- 4. Frontend Client ---
+  client:
+    build: ./client
+    container_name: frontend-client
+    ports:
+      - "3000:80" # Map host 3000 to Nginx 80
+    depends_on:
+      - server
+
+# Shared persistent storage for AI model weights
+volumes:
+  chatterbox_model_cache:
+  voice_model_cache:
